@@ -1,0 +1,1 @@
+To make changes, open the java project in mixpanel-Unity-Plugin-android-4.2.1, and edit the mixpanel-android>java>com.mixpanel.android.mpmetrics>MixPanelAndroidPlugin.java which is the wrapper for unity.
