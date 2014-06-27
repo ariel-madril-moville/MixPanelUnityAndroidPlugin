@@ -1,8 +1,10 @@
 package com.mixpanel.android.mpmetrics;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.util.Log;
 
 public class MixPanelAndroidPlugin
 {
@@ -13,7 +15,14 @@ public class MixPanelAndroidPlugin
 
 	public static void Initialize(Context context, String token)
 	{
+		Log.d("tag","entered initialize inside plugin with toke " + token );
+		if(context == null)
+			Log.d("tag","context is null");
+		
 		mApiInstance = MixpanelAPI.getInstance(context, token);
+		
+		if(mApiInstance != null)
+			Log.d("tag", "mapi instance ok.");
 	}
 	
 	public static void Track(String eventName, String values)
@@ -23,6 +32,10 @@ public class MixPanelAndroidPlugin
 	
 	public static void RegisterSuperProperties(String values)
 	{
+		if(mApiInstance == null)
+		{
+			Log.d("tag","api is null...");
+		}
 		mApiInstance.registerSuperProperties(GetJsonFromString(values));
 	}
 	
@@ -61,12 +74,40 @@ public class MixPanelAndroidPlugin
 					{
 						try
 						{
-							boolean valeuAsBool = Boolean.parseBoolean(keyValue[1]);
-							json.put(keyValue[0], valeuAsBool);
+							if (keyValue[1].equalsIgnoreCase("true") || keyValue[1].equalsIgnoreCase("false")) 
+							{
+								boolean valeuAsBool = Boolean.parseBoolean(keyValue[1]);
+								json.put(keyValue[0], valeuAsBool);
+							}
+							else
+							{
+								throw new Exception();
+							}
 						}
 						catch (Exception notBool)
 						{
-							json.put(keyValue[0], keyValue[1]);
+							try
+							{
+								JSONArray jsonArray = new JSONArray();
+								String[] itemAsArray = keyValue[1].split(",");
+								
+								if(itemAsArray.length > 1)
+								{
+									for(int j = 0; j < itemAsArray.length; j++)
+									{
+										jsonArray.put(itemAsArray[j]);
+									}
+									json.put(keyValue[0], jsonArray);
+								}
+								else
+								{
+									throw new Exception();
+								}
+							}
+							catch(Exception notAnArray)
+							{
+								json.put(keyValue[0], keyValue[1]);
+							}
 						}
 					}
 				}
